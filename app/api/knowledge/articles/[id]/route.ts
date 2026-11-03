@@ -2,17 +2,17 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(
-  req: Request,
-  { params }: {
+  request: Request,
+  {
+    params,
+  }: {
     params: Promise<{
       id: string;
     }>;
   }
 ) {
   try {
-
-    const { id } =
-      await params;
+    const { id } = await params;
 
     const website =
       await prisma.website.findFirst();
@@ -30,10 +30,7 @@ export async function GET(
     }
 
     const baseUrl =
-      website.domain.replace(
-        /\/$/,
-        ""
-      );
+      website.domain.replace(/\/$/, "");
 
     const token = Buffer.from(
       `${website.wpUsername}:${website.wpAppPassword}`
@@ -46,6 +43,7 @@ export async function GET(
           Authorization:
             `Basic ${token}`,
         },
+        cache: "no-store",
       }
     );
 
@@ -57,6 +55,8 @@ export async function GET(
     );
 
   } catch (error) {
+
+    console.error(error);
 
     return NextResponse.json(
       {
